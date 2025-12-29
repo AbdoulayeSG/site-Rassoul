@@ -1,0 +1,30 @@
+# Netlify Configuration File
+
+# Build settings
+[build]
+  publish = "/"
+  command = "npm run build"
+
+# Redirects and rewrites
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin/*"
+  to = "/admin/:splat"
+  status = 200
+
+# Enable Netlify Identity
+[context.production]
+  environment = { }
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

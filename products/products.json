@@ -1,0 +1,22 @@
+{
+  "products": [
+    {
+      "name": "Montre Élégance",
+      "price": 299.99,
+      "description": "Montre classique en acier inoxydable avec mouvement à quartz. Design intemporel et élégant.",
+      "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+    },
+    {
+      "name": "Sac à Main Premium",
+      "price": 189.00,
+      "description": "Sac en cuir véritable avec finitions soignées. Parfait pour un usage quotidien.",
+      "image": "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&h=300&fit=crop"
+    },
+    {
+      "name": "Lunettes de Soleil",
+      "price": 129.50,
+      "description": "Protection UV400 avec monture moderne et verres polarisés pour un confort optimal.",
+      "image": "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=300&fit=crop"
+    }
+  ]
+}

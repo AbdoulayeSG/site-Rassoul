@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Boutique</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-container {
+            background: white;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            color: #555;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        input {
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-cms {
+            background: #28a745;
+        }
+
+        .btn-cms:hover {
+            background: #218838;
+        }
+
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 0.8rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .user-email {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 2rem 0;
+            text-align: left;
+            border-radius: 4px;
+        }
+
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .info-box p {
+            color: #555;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-container">
+        <h1>🔐 Administration</h1>
+        
+        <div id="auth-content">
+            <!-- Login Form -->
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="username">Identifiant</label>
+                    <input type="text" id="username" name="username" required autocomplete="username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+                
+                <div id="error-message" style="display: none;" class="error"></div>
+                
+                <button type="submit" class="btn">Se connecter</button>
+                
+                <div class="back-link">
+                    <a href="/">← Retour au site</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Configuration des identifiants (À MODIFIER !)
+        const ADMIN_CREDENTIALS = {
+            username: 'admin',
+            password: 'admin123'
+        };
+
+        // Vérifier si déjà connecté
+        if (sessionStorage.getItem('isAdminAuthenticated') === 'true') {
+            showAdminPanel();
+        }
+
+        // Gestion du formulaire de connexion
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error-message');
+            
+            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+                // Connexion réussie
+                sessionStorage.setItem('isAdminAuthenticated', 'true');
+                sessionStorage.setItem('adminUsername', username);
+                showAdminPanel();
+            } else {
+                // Erreur de connexion
+                errorDiv.textContent = 'Identifiant ou mot de passe incorrect';
+                errorDiv.style.display = 'block';
+                
+                // Effacer le message après 3 secondes
+                setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 3000);
+            }
+        });
+
+        function showAdminPanel() {
+            const username = sessionStorage.getItem('adminUsername') || 'Admin';
+            
+            document.getElementById('auth-content').innerHTML = `
+                <div class="user-info">
+                    <p style="color: #666; margin-bottom: 0.5rem;">Connecté en tant que</p>
+                    <p class="user-email">${username}</p>
+                </div>
+
+                <div class="info-box">
+                    <h3>📝 Gérer les produits</h3>
+                    <p>Utilisez le CMS pour ajouter, modifier ou supprimer des produits. Chaque modification déclenchera automatiquement un nouveau déploiement.</p>
+                </div>
+
+                <div class="button-group">
+                    <a href="/admin/cms/" class="btn btn-cms">Ouvrir le CMS</a>
+                    <a href="/" class="btn btn-secondary">Retour au site</a>
+                    <button onclick="logout()" class="btn btn-secondary">Déconnexion</button>
+                </div>
+            `;
+        }
+
+        function logout() {
+            sessionStorage.removeItem('isAdminAuthenticated');
+            sessionStorage.removeItem('adminUsername');
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>

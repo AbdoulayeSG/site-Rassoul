@@ -1,0 +1,16 @@
+{
+  "name": "boutique-netlify",
+  "version": "1.0.0",
+  "description": "Site e-commerce statique avec Netlify Identity et Decap CMS",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "keywords": [
+    "netlify",
+    "decap-cms",
+    "static-site",
+    "ecommerce"
+  ],
+  "author": "",
+  "license": "MIT"
+}

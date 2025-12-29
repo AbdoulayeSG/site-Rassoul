@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boutique - Produits Premium</title>
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="brand">Boutique Premium</h1>
+                <nav>
+                    <a href="/" class="nav-link active">Produits</a>
+                    <a href="/admin" class="nav-link admin-link">Admin</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <section class="hero">
+                <h2 class="hero-title">Découvrez nos produits</h2>
+                <p class="hero-subtitle">Une sélection soigneusement choisie pour vous</p>
+            </section>
+
+            <div id="products-grid" class="products-grid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Chargement des produits...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+ <footer id="contact">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <p>📍 63rue Felix-Faure<br>Dakar plateau,Dakar</p>
+                <p>📞 +221 78 131 82 77</p>
+                <p>✉️ info@elegancecouture.fr</p>
+            </div>
+            <div class="footer-section">
+                <h4>Service Client</h4>
+                <a href="#">FAQ</a>
+                <a href="#">Livraison & Retours</a>
+                <a href="#">Conditions Générales</a>
+                <a href="#">Politique de Confidentialité</a>
+            </div>
+            <div class="footer-section">
+                <h4>Entreprise</h4>
+                <a href="#">À Propos</a>
+                <a href="#">Carrières</a>
+                <a href="#">Blog</a>
+                <a href="#">Presse</a>
+            </div>
+            <div class="footer-section">
+                <h4>Suivez-Nous</h4>
+                <a href="#">Facebook</a>
+                <a href="#">Instagram</a>
+                <a href="#">Pinterest</a>
+                <a href="#">Twitter</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; By Portgas </p>
+        </div>
+    </footer>
+
+<script>
+// CONFIGURATION - À MODIFIER
+const WHATSAPP_NUMBER = "221770368599"; // Remplace par ton numéro WhatsApp (format international sans +)
+
+// Charger et afficher les produits depuis localStorage
+async function loadProducts() {
+    const grid = document.getElementById('products-grid');
+    
+    try {
+        // Charger depuis localStorage (même clé que le CMS)
+        const saved = localStorage.getItem('boutique_products');
+        let products = [];
+        
+        if (saved) {
+            products = JSON.parse(saved);
+        } else {
+            // Produits par défaut si vide
+            products = [
+                {
+                    name: "Montre Élégance",
+                    price: 196700,
+                    description: "Montre classique en acier inoxydable avec mouvement à quartz. Design intemporel et élégant.",
+                    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+                },
+                {
+                    name: "Sac à Main Premium",
+                    price: 123900,
+                    description: "Sac en cuir véritable avec finitions soignées. Parfait pour un usage quotidien.",
+                    image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&h=300&fit=crop"
+                },
+                {
+                    name: "Lunettes de Soleil",
+                    price: 84900,
+                    description: "Protection UV400 avec monture moderne et verres polarisés pour un confort optimal.",
+                    image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=300&fit=crop"
+                }
+            ];
+            // Sauvegarder les produits par défaut
+            localStorage.setItem('boutique_products', JSON.stringify(products));
+        }
+        
+        if (products.length === 0) {
+            grid.innerHTML = `
+                <div class="loading">
+                    <p>Aucun produit disponible pour le moment.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Clear loading state
+        grid.innerHTML = '';
+        
+        // Create product cards
+        products.forEach(product => {
+            const card = createProductCard(product);
+            grid.appendChild(card);
+        });
+        
+    } catch (error) {
+        console.error('Erreur de chargement:', error);
+        grid.innerHTML = `
+            <div class="loading">
+                <p>Erreur lors du chargement des produits.</p>
+            </div>
+        `;
+    }
+}
+
+function createProductCard(product) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    
+    const imageUrl = product.image || 'https://via.placeholder.com/400x300?text=Produit';
+    const price = typeof product.price === 'number' ? product.price : parseFloat(product.price);
+    
+    card.innerHTML = `
+        <img src="${imageUrl}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/400x300?text=Image+non+disponible'">
+        <div class="product-info">
+            <h3 class="product-name">${product.name}</h3>
+            <p class="product-price">${Math.round(price).toLocaleString('fr-FR')} FCFA</p>
+            <p class="product-description">${product.description || ''}</p>
+            <button class="btn-cart" onclick="orderOnWhatsApp('${product.name.replace(/'/g, "\\'")}', ${Math.round(price)})">
+                🛒 Commander sur WhatsApp
+            </button>
+        </div>
+    `;
+    
+    return card;
+}
+
+function orderOnWhatsApp(productName, price) {
+    const message = `Bonjour ! Je suis intéressé(e) par :\n\n📦 *${productName}*\n💰 Prix : ${price.toLocaleString('fr-FR')} FCFA\n\nJe voudrais passer commande.`;
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+}
+
+// Rafraîchir automatiquement quand les produits changent
+window.addEventListener('storage', function(e) {
+    if (e.key === 'boutique_products') {
+        loadProducts();
+    }
+});
+
+// Charger au démarrage
+document.addEventListener('DOMContentLoaded', loadProducts);
+</script>
+</body>
+</html>
