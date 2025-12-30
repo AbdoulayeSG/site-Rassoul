@@ -441,8 +441,12 @@
             }
         }
 
-      // Sauvegarder les produits sur JSON Bin
+    // Sauvegarder les produits sur JSON Bin
 async function saveProducts() {
+    console.log('🔄 Tentative de sauvegarde...', products);
+    console.log('📦 BIN_ID:', BIN_ID);
+    console.log('🔑 API_KEY:', API_KEY ? 'Présent' : 'MANQUANT');
+    
     try {
         const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
             method: 'PUT',
@@ -453,16 +457,24 @@ async function saveProducts() {
             body: JSON.stringify({ products: products })
         });
         
-        if (response.ok) {
-            displayProducts();
-            updateSaveIndicator();
-            // Ne pas appeler showAlert ici, on le fait dans les fonctions appelantes
-        } else {
-            throw new Error('Erreur de sauvegarde');
+        console.log('📡 Response status:', response.status);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Erreur API:', errorText);
+            throw new Error(`Erreur HTTP: ${response.status} - ${errorText}`);
         }
+        
+        const result = await response.json();
+        console.log('✅ Sauvegarde réussie:', result);
+        
+        displayProducts();
+        updateSaveIndicator();
+        
     } catch (error) {
-        console.error('Erreur:', error);
-        alert('❌ Erreur de sauvegarde en ligne');
+        console.error('❌ Erreur complète:', error);
+        alert('❌ Erreur de sauvegarde en ligne: ' + error.message);
+        throw error;
     }
 }
 
