@@ -610,64 +610,68 @@ document.getElementById('product-form').addEventListener('submit', async functio
             document.getElementById('product-modal').classList.remove('active');
         }
 
-        // OPTION 1: Upload vers Catbox
-        document.getElementById('image-file-catbox').addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const statusSpan = document.getElementById('upload-status-catbox');
-            const imageInput = document.getElementById('product-image');
-            const preview = document.getElementById('image-preview');
-            
-            if (!file.type.startsWith('image/')) {
-                alert('❌ Veuillez sélectionner une image valide');
-                return;
-            }
-            
-            if (file.size > 200 * 1024 * 1024) {
-                alert('❌ L\'image est trop grande. Maximum 200MB');
-                return;
-            }
-            
-            try {
-                statusSpan.textContent = '⏳ Upload vers Catbox...';
-                statusSpan.style.color = '#667eea';
-                
-                const formData = new FormData();
-                formData.append('reqtype', 'fileupload');
-                formData.append('fileToUpload', file);
-                
-                const response = await fetch('https://catbox.moe/user/api.php', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const text = await response.text();
-                
-                if (text.startsWith('http')) {
-                    const imageUrl = text.trim();
-                    imageInput.value = imageUrl;
-                    preview.src = imageUrl;
-                    preview.style.display = 'block';
-                    statusSpan.textContent = '✅ Uploadé sur Catbox !';
-                    statusSpan.style.color = '#28a745';
-                    
-                    setTimeout(() => statusSpan.textContent = '', 3000);
-                } else {
-                    throw new Error('Upload échoué');
-                }
-                
-            } catch (error) {
-                console.error('Erreur:', error);
-                statusSpan.textContent = '❌ Erreur';
-                statusSpan.style.color = '#dc3545';
-                
-                // Fallback vers base64
-                if (confirm('Catbox a échoué. Utiliser l\'upload local (base64) ?')) {
-                    uploadToBase64(file);
-                }
-            }
+       // OPTION 1: Upload vers Catbox
+document.getElementById('image-file-catbox').addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const statusSpan = document.getElementById('upload-status-catbox');
+    const imageInput = document.getElementById('product-image');
+    const preview = document.getElementById('image-preview');
+    
+    if (!file.type.startsWith('image/')) {
+        alert('❌ Veuillez sélectionner une image valide');
+        return;
+    }
+    
+    if (file.size > 200 * 1024 * 1024) {
+        alert('❌ L\'image est trop grande. Maximum 200MB');
+        return;
+    }
+    
+    try {
+        statusSpan.textContent = '⏳ Upload vers Catbox...';
+        statusSpan.style.color = '#667eea';
+        
+        const formData = new FormData();
+        formData.append('reqtype', 'fileupload');
+        formData.append('fileToUpload', file);
+        
+        // Utiliser fetch sans mode CORS
+        const response = await fetch('https://catbox.moe/user/api.php', {
+            method: 'POST',
+            body: formData
         });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const text = await response.text();
+        console.log('Réponse Catbox:', text);
+        
+        // Vérifier si c'est une URL valide
+        if (text && (text.startsWith('http://') || text.startsWith('https://'))) {
+            const imageUrl = text.trim();
+            imageInput.value = imageUrl;
+            preview.src = imageUrl;
+            preview.style.display = 'block';
+            statusSpan.textContent = '✅ Uploadé sur Catbox !';
+            statusSpan.style.color = '#28a745';
+            
+            setTimeout(() => statusSpan.textContent = '', 3000);
+        } else {
+            throw new Error('Réponse invalide de Catbox: ' + text);
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur Catbox:', error);
+        statusSpan.textContent = '❌ Échec';
+        statusSpan.style.color = '#dc3545';
+        
+        alert('❌ L\'upload Catbox a échoué.\n\nSolutions alternatives:\n1. Réessayez (parfois ça marche au 2e essai)\n2. Uploadez votre image sur https://imgbb.com\n3. Ou collez directement un lien d\'image ci-dessous');
+    }
+});
 
         // OPTION 2: Upload local (Base64)
         document.getElementById('image-file-local').addEventListener('change', function(e) {
