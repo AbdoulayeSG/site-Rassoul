@@ -73,45 +73,26 @@
     </footer>
 
 <script>
-// CONFIGURATION - À MODIFIER
-const WHATSAPP_NUMBER = "221765099464"; // Remplace par ton numéro WhatsApp (format international sans +)
+// CONFIGURATION JSON BIN
+const BIN_ID = '695432fcd0ea881f404a2bc0'; // Colle ton Bin ID ici
+const API_KEY = '$2a$10$cCTdYY15GqG1EHIKaxzGJ.aYc2hTV8E4vF8YgjwiGeQPcgNhSu0RC'; // Colle ta Master Key ici
 
-// Charger et afficher les produits depuis localStorage
-async function loadProducts() { 
+// CONFIGURATION WhatsApp
+const WHATSAPP_NUMBER = "221765099464"; // Ton numéro
+
+// Charger les produits depuis JSON Bin
+async function loadProducts() {
     const grid = document.getElementById('products-grid');
     
     try {
-        // Charger depuis localStorage (même clé que le CMS)
-        const saved = localStorage.getItem('boutique_products');
-        let products = [];
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+            headers: {
+                'X-Master-Key': API_KEY
+            }
+        });
         
-        if (saved) {
-            products = JSON.parse(saved);
-        } else {
-            // Produits par défaut si vide
-            products = [
-                {
-                    name: "Montre Élégance",
-                    price: 196700,
-                    description: "Montre classique en acier inoxydable avec mouvement à quartz. Design intemporel et élégant.",
-                    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
-                },
-                {
-                    name: "Sac à Main Premium",
-                    price: 123900,
-                    description: "Sac en cuir véritable avec finitions soignées. Parfait pour un usage quotidien.",
-                    image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&h=300&fit=crop"
-                },
-                {
-                    name: "Lunettes de Soleil",
-                    price: 84900,
-                    description: "Protection UV400 avec monture moderne et verres polarisés pour un confort optimal.",
-                    image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=300&fit=crop"
-                }
-            ];
-            // Sauvegarder les produits par défaut
-            localStorage.setItem('boutique_products', JSON.stringify(products));
-        }
+        const data = await response.json();
+        const products = data.record.products || [];
         
         if (products.length === 0) {
             grid.innerHTML = `
@@ -122,14 +103,15 @@ async function loadProducts() {
             return;
         }
         
-        // Clear loading state
         grid.innerHTML = '';
         
-        // Create product cards
         products.forEach(product => {
             const card = createProductCard(product);
             grid.appendChild(card);
         });
+        
+        // Animation au scroll
+        setTimeout(setupScrollAnimation, 100);
         
     } catch (error) {
         console.error('Erreur de chargement:', error);
@@ -169,12 +151,28 @@ function orderOnWhatsApp(productName, price) {
     window.open(whatsappUrl, '_blank');
 }
 
-// Rafraîchir automatiquement quand les produits changent
-window.addEventListener('storage', function(e) {
-    if (e.key === 'boutique_products') {
-        loadProducts();
-    }
-});
+// Observer pour animer les cartes au scroll
+function setupScrollAnimation() {
+    const observerOptions = {
+        threshold: 0.15,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.classList.add('visible');
+                }, index * 100);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.product-card').forEach(card => {
+        observer.observe(card);
+    });
+}
 
 // Charger au démarrage
 document.addEventListener('DOMContentLoaded', loadProducts);

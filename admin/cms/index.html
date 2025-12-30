@@ -412,38 +412,58 @@
     </div>
 
     <script>
+        // CONFIGURATION JSON BIN
+        const BIN_ID = '695432fcd0ea881f404a2bc0'; // Remplace par ton Bin ID
+        const API_KEY = '$2a$10$cCTdYY15GqG1EHIKaxzGJ.aYc2hTV8E4vF8YgjwiGeQPcgNhSu0RC'; // Remplace par ta Master Key
+
         let products = [];
         let editingIndex = null;
 
-        // Charger les produits depuis localStorage
-        function loadProducts() {
-            const saved = localStorage.getItem('boutique_products');
-            if (saved) {
-                products = JSON.parse(saved);
-            } else {
-                // Produits par défaut si aucun n'est sauvegardé
-                products = [
-                    {
-                        name: "Montre Élégance",
-                        price: 196700,
-                        description: "Montre classique en acier inoxydable avec mouvement à quartz. Design intemporel et élégant.",
-                        image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
-                    },
-                    {
-                        name: "Sac à Main Premium",
-                        price: 123900,
-                        description: "Sac en cuir véritable avec finitions soignées. Parfait pour un usage quotidien.",
-                        image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&h=300&fit=crop"
-                    },
-                    {
-                        name: "Lunettes de Soleil",
-                        price: 84900,
-                        description: "Protection UV400 avec monture moderne et verres polarisés pour un confort optimal.",
-                        image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=300&fit=crop"
+        // Charger les produits depuis JSON Bin
+        async function loadProducts() {
+            try {
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: {
+                        'X-Master-Key': API_KEY
                     }
-                ];
+                });
+                
+                const data = await response.json();
+                products = data.record.products || [];
+                
+                displayProducts();
+                updateSaveIndicator();
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('❌ Erreur de chargement');
+                products = [];
+                displayProducts();
             }
-            displayProducts();
+        }
+
+        // Sauvegarder les produits sur JSON Bin
+        async function saveProducts() {
+            try {
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify({ products: products })
+                });
+                
+                if (response.ok) {
+                    displayProducts();
+                    updateSaveIndicator();
+                    showAlert('✅ Produits sauvegardés en ligne !');
+                } else {
+                    throw new Error('Erreur de sauvegarde');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('❌ Erreur de sauvegarde en ligne');
+            }
         }
 
         // Afficher les produits
@@ -674,13 +694,6 @@
             closeModal();
         });
 
-        // Sauvegarder les produits dans localStorage
-        function saveProducts() {
-            localStorage.setItem('boutique_products', JSON.stringify(products));
-            displayProducts();
-            updateSaveIndicator();
-        }
-
         // Afficher un message de confirmation
         function showAlert(message) {
             const alert = document.createElement('div');
@@ -696,12 +709,11 @@
         // Mettre à jour l'indicateur de sauvegarde
         function updateSaveIndicator() {
             const indicator = document.getElementById('save-indicator');
-            indicator.textContent = `✓ ${products.length} produit(s) sauvegardé(s)`;
+            indicator.textContent = `✓ ${products.length} produit(s) en ligne`;
         }
 
         // Charger au démarrage
         loadProducts();
-        updateSaveIndicator();
     </script>
 </body>
 </html>
