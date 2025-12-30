@@ -492,9 +492,15 @@ async function deleteProduct(index) {
     }
 }
 
-// Soumettre formulaire
+//Soumettre formulaire
 document.getElementById('product-form').addEventListener('submit', async function(e) {
     e.preventDefault();
+    
+    // Empêcher les doubles soumissions
+    const submitBtn = this.querySelector('button[type="submit"]');
+    if (submitBtn.disabled) return;
+    submitBtn.disabled = true;
+    submitBtn.textContent = '⏳ Enregistrement...';
     
     const product = {
         name: document.getElementById('product-name').value,
@@ -505,10 +511,12 @@ document.getElementById('product-form').addEventListener('submit', async functio
 
     try {
         if (editingIndex !== null) {
+            // Modifier un produit existant
             products[editingIndex] = product;
             await saveProducts();
             showAlert('Produit modifié avec succès !');
         } else {
+            // Ajouter un nouveau produit
             products.push(product);
             await saveProducts();
             showAlert('Produit ajouté avec succès !');
@@ -518,6 +526,10 @@ document.getElementById('product-form').addEventListener('submit', async functio
     } catch (error) {
         console.error('Erreur:', error);
         alert('❌ Erreur lors de l\'enregistrement');
+    } finally {
+        // Réactiver le bouton
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Enregistrer';
     }
 });
 
